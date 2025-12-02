@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from typing import List
 from backend.core.database import get_db
+from backend.core.rate_limit import limiter
 from backend.models.tone_table import ToneEntry
 from backend.models.schemas import (
     ToneEntryCreate,
@@ -20,6 +21,14 @@ async def list_tone_entries(
     db: AsyncSession = Depends(get_db)
 ):
     """List all tone entries."""
+    # Validate and cap query parameters to prevent abuse
+    if skip < 0:
+        skip = 0
+    if limit < 1:
+        limit = 100
+    if limit > 1000:  # Cap maximum results
+        limit = 1000
+
     result = await db.execute(
         select(ToneEntry).offset(skip).limit(limit)
     )
@@ -48,7 +57,9 @@ async def get_tone_entry(
 
 
 @router.post("/", response_model=ToneEntryResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("30/minute")  # Limit creation to prevent database spam
 async def create_tone_entry(
+    request: Request,
     entry: ToneEntryCreate,
     db: AsyncSession = Depends(get_db)
 ):
@@ -95,7 +106,9 @@ async def update_tone_entry(
 
 
 @router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("30/minute")  # Limit deletions
 async def delete_tone_entry(
+    request: Request,
     entry_id: int,
     db: AsyncSession = Depends(get_db)
 ):

@@ -355,6 +355,54 @@ chmod 755 ~/Dual-Tone-Decoder/uploads
 
 4. **Database**: SQLite file in project directory, not web-accessible
 
+## Cleanup and Maintenance
+
+### Orphaned File Cleanup
+
+Uploaded audio files are automatically deleted after processing. However, if cleanup fails (rare), orphaned files may accumulate. Set up a cron job to clean old files:
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add this line to clean files older than 1 hour, every hour
+0 * * * * find ~/Dual-Tone-Decoder/uploads -type f -mmin +60 -delete 2>/dev/null
+```
+
+Or create a cleanup script:
+
+```bash
+# Create cleanup script
+cat > ~/Dual-Tone-Decoder/cleanup-uploads.sh << 'EOF'
+#!/bin/bash
+# Clean up orphaned audio files older than 1 hour
+UPLOAD_DIR="$HOME/Dual-Tone-Decoder/uploads"
+find "$UPLOAD_DIR" -type f -name "*.wav" -mmin +60 -delete
+EOF
+
+chmod +x ~/Dual-Tone-Decoder/cleanup-uploads.sh
+
+# Add to crontab
+crontab -e
+# Add: 0 * * * * /home/yourusername/Dual-Tone-Decoder/cleanup-uploads.sh
+```
+
+### Monitoring Disk Usage
+
+Check uploads directory periodically:
+
+```bash
+# Check number of files
+ls -1 ~/Dual-Tone-Decoder/uploads | wc -l
+
+# Check disk usage
+du -sh ~/Dual-Tone-Decoder/uploads
+```
+
+Normal state: 0-2 files (only during active processing)
+
+If you see many files accumulated, cleanup failed and the cron job will remove them.
+
 ## Backup
 
 Important files to backup:
@@ -371,6 +419,8 @@ Important files to backup:
 # (Optional) NGINX config if customized
 /etc/nginx/sites-available/dualtone
 ```
+
+**Note:** You do NOT need to backup the `uploads/` directory - files are temporary and deleted after processing.
 
 Example backup:
 ```bash

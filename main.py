@@ -1,6 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from backend.core.database import init_db
+from backend.core.rate_limit import limiter
 from backend.api import tone_entries, audio_upload
 
 
@@ -19,12 +22,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Add rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Include API routers
 app.include_router(tone_entries.router)
 app.include_router(audio_upload.router)
 
 
 @app.get("/health")
-async def health_check():
+@limiter.limit("60/minute")  # Allow 60 health checks per minute
+async def health_check(request: Request):
     """Health check endpoint."""
     return {"status": "healthy"}
