@@ -54,7 +54,7 @@ FREQUENCY_TOLERANCE_HZ=2.0
 
 ```bash
 # Still in ~/Dual-Tone-Decoder with venv activated
-uvicorn main:app --host 127.0.0.1 --port 8001
+cd backend && uvicorn main:app --host 127.0.0.1 --port 8001
 
 # In another terminal, test:
 curl http://localhost:8001/health
@@ -81,7 +81,7 @@ After=network.target
 Type=simple
 User=yourusername
 Group=yourusername
-WorkingDirectory=/home/yourusername/Dual-Tone-Decoder
+WorkingDirectory=/home/yourusername/Dual-Tone-Decoder/backend
 Environment="PATH=/home/yourusername/Dual-Tone-Decoder/venv/bin"
 ExecStart=/home/yourusername/Dual-Tone-Decoder/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8001 --workers 2
 Restart=always
@@ -113,7 +113,7 @@ Copy frontend files to be served by NGINX:
 sudo mkdir -p /var/www/dualtone
 
 # Copy frontend files
-sudo cp ~/Dual-Tone-Decoder/frontend/templates/index.html /var/www/dualtone/
+sudo cp ~/Dual-Tone-Decoder/frontend/index.html /var/www/dualtone/
 sudo cp -r ~/Dual-Tone-Decoder/frontend/static /var/www/dualtone/
 
 # Set ownership (replace 'yourusername' with your username)
@@ -286,7 +286,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Copy updated frontend files to /var/www
-sudo cp ~/Dual-Tone-Decoder/frontend/templates/index.html /var/www/dualtone/
+sudo cp ~/Dual-Tone-Decoder/frontend/index.html /var/www/dualtone/
 sudo cp -r ~/Dual-Tone-Decoder/frontend/static/* /var/www/dualtone/static/
 
 # Restart backend service
@@ -306,7 +306,7 @@ sudo journalctl -u tone-decoder -n 50
 # Try running manually to see errors
 cd ~/Dual-Tone-Decoder
 source venv/bin/activate
-uvicorn main:app --host 127.0.0.1 --port 8001
+cd backend && uvicorn main:app --host 127.0.0.1 --port 8001
 ```
 
 ### Port already in use

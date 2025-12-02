@@ -60,4 +60,5 @@ echo "============================================"
 echo ""
 
 # Start the FastAPI backend server with uvicorn
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+# Use -m to run as module from backend directory
+cd backend && uvicorn main:app --host 0.0.0.0 --port 8000 --reload
