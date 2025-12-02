@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from backend.core.database import init_db
 from backend.api import tone_entries, audio_upload
@@ -24,15 +22,6 @@ app = FastAPI(
 # Include API routers
 app.include_router(tone_entries.router)
 app.include_router(audio_upload.router)
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-
-
-@app.get("/")
-async def read_root():
-    """Serve the main HTML page."""
-    return FileResponse("frontend/templates/index.html")
 
 
 @app.get("/health")
