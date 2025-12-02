@@ -9,6 +9,13 @@ A web-based tool for decoding two-tone sequential paging signals used by fire an
 - **Configurable Tone Tables**: Manage custom tone-to-unit mappings via web interface
 - **Real-time Results**: Displays detected frequencies, confidence levels, and matched units
 - **Local Processing**: All processing happens on your server - no third-party dependencies
+- **Security Hardened**: Rate limiting, input validation, path traversal protection
+
+## Documentation
+
+- **[Deployment Guide](DEPLOYMENT.md)** - Complete guide for deploying to Ubuntu server with NGINX
+- **[Testing Guide](TESTING.md)** - Testing procedures and sample audio generation
+- **[Security Documentation](SECURITY.md)** - Security measures, limitations, and best practices
 
 ## Technology Stack
 
@@ -16,6 +23,7 @@ A web-based tool for decoding two-tone sequential paging signals used by fire an
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **Audio Processing**: librosa, scipy, numpy
 - **Database**: SQLite (via SQLAlchemy async)
+- **Security**: SlowAPI rate limiting, input sanitization
 
 ## Installation
 
@@ -56,17 +64,26 @@ ALLOWED_EXTENSIONS=.wav
 FREQUENCY_TOLERANCE_HZ=2.0
 ```
 
-## Running the Application
+## Quick Start
 
-1. Start the server:
+### Development/Local Testing
+
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# Use the included start script
+./start.sh
 ```
 
-2. Open your browser to:
+Or manually:
+```bash
+source venv/bin/activate
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
-http://localhost:8000
-```
+
+Then open your browser to: `http://localhost:8000`
+
+### Production Deployment
+
+For production deployment to Ubuntu server with NGINX, see **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete instructions.
 
 ## Usage
 
@@ -131,50 +148,6 @@ Reference document included: `tone-signaling-charts.pdf`
 
 - `GET /health` - Health check endpoint
 
-## Deployment
-
-### Ubuntu Server Deployment
-
-1. Install system dependencies:
-```bash
-sudo apt update
-sudo apt install python3-pip python3-venv libsndfile1 ffmpeg
-```
-
-2. Follow installation steps above
-
-3. Run with production server:
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-4. (Recommended) Set up as systemd service:
-
-Create `/etc/systemd/system/tone-decoder.service`:
-```ini
-[Unit]
-Description=Dual-Tone Decoder
-After=network.target
-
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/path/to/Dual-Tone-Decoder
-Environment="PATH=/path/to/Dual-Tone-Decoder/venv/bin"
-ExecStart=/path/to/Dual-Tone-Decoder/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Then:
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable tone-decoder
-sudo systemctl start tone-decoder
-```
-
-5. (Recommended) Set up nginx reverse proxy for HTTPS
 
 ## Configuration
 
@@ -188,35 +161,36 @@ Edit `.env` file to customize:
 
 ## Troubleshooting
 
-### Audio file won't decode
-- Ensure file is WAV format
-- Check file size is under 50MB
-- Verify tones are clearly audible
-- Try increasing `FREQUENCY_TOLERANCE_HZ` in `.env`
+For troubleshooting deployment issues, see **[DEPLOYMENT.md](DEPLOYMENT.md#troubleshooting)**.
 
-### No matches found
-- Add tone entries to the database via the web interface
-- Verify frequencies are correct (reference your dispatch documentation)
-- Check detected frequencies against your tone table
+Common issues:
+- **Audio file won't decode**: Ensure file is WAV format, under 50MB, with clear tones
+- **No matches found**: Add tone entries via web interface, verify frequencies are correct
+- **Rate limited**: Wait 1 minute (10 uploads/minute limit per IP address)
 
-### Performance issues
-- Increase server resources
-- Reduce `MAX_FILE_SIZE_MB` if processing large files
-- Run with multiple workers: `--workers 4`
+## Security
 
-## License
+This application includes:
+- Rate limiting to prevent abuse
+- Input validation and sanitization
+- Path traversal protection
+- Memory exhaustion prevention
 
-This project is provided as-is for use by fire and EMS services for decoding paging tones.
+**Important:** No authentication is implemented by default. For production deployment, add Basic Auth via NGINX or implement API keys. See **[SECURITY.md](SECURITY.md)** for details.
 
 ## Contributing
 
 To customize for your region:
 
 1. Obtain official tone frequency documentation from your dispatch center
-2. Add entries via the web interface or directly to the database
-3. Adjust `FREQUENCY_TOLERANCE_HZ` based on your radio system characteristics
+2. Add entries via the web interface
+3. Adjust `FREQUENCY_TOLERANCE_HZ` in `.env` based on your radio system characteristics
 
 ## Acknowledgments
 
 - Frequency reference data from Midian Electronics tone signaling charts
 - Built for fire and EMS services to improve dispatch operations
+
+## License
+
+This project is provided as-is for use by fire and EMS services for decoding paging tones.
