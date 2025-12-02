@@ -193,4 +193,6 @@ To customize for your region:
 
 ## License
 
+MIT License - see [LICENSE](LICENSE) file for details.
+
 This project is provided as-is for use by fire and EMS services for decoding paging tones.
