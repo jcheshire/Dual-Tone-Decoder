@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual-Tone Decoder</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dual-Tone Sequential Paging Decoder</h1>
+            <p class="subtitle">Upload audio files to decode two-tone paging signals</p>
+        </header>
+
+        <main>
+            <!-- Audio Upload Section -->
+            <section class="upload-section">
+                <h2>Upload Audio File</h2>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="audioFile" accept=".wav" hidden>
+                    <label for="audioFile" class="upload-label">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Click to upload or drag and drop</span>
+                        <span class="file-info">WAV files only (Max 50MB)</span>
+                    </label>
+                </div>
+                <div id="fileInfo" class="file-info-display" style="display: none;"></div>
+                <button id="decodeBtn" class="btn btn-primary" disabled>Decode Audio</button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Detection Results</h2>
+                <div class="results-card">
+                    <div class="result-row">
+                        <label>Tone 1:</label>
+                        <span id="tone1Result" class="result-value">-</span>
+                    </div>
+                    <div class="result-row">
+                        <label>Tone 2:</label>
+                        <span id="tone2Result" class="result-value">-</span>
+                    </div>
+                    <div class="result-row">
+                        <label>Confidence:</label>
+                        <span id="confidenceResult" class="result-value">-</span>
+                    </div>
+                    <div class="result-row matched-entry" id="matchedEntry" style="display: none;">
+                        <label>Matched:</label>
+                        <span id="matchedLabel" class="result-value highlight">-</span>
+                    </div>
+                    <div class="result-message" id="resultMessage"></div>
+                </div>
+            </section>
+
+            <!-- Tone Table Management Section -->
+            <section class="tone-table-section">
+                <h2>Tone Table Management</h2>
+
+                <div class="table-controls">
+                    <button id="addRowBtn" class="btn btn-secondary">Add Entry</button>
+                    <button id="saveTableBtn" class="btn btn-success">Save All Changes</button>
+                    <button id="loadTableBtn" class="btn btn-secondary">Refresh Table</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="toneTable">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Tone 1 (Hz)</th>
+                                <th>Tone 2 (Hz)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="toneTableBody">
+                            <!-- Rows will be dynamically added -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-info">
+                    <p><strong>Frequency Tolerance:</strong> ±2.0 Hz</p>
+                    <p>Detected tones must match within tolerance to find a match</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Dual-Tone Decoder | Supports Motorola Quick Call II and compatible formats</p>
+        </footer>
+    </div>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
